@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>神秘入口</title>
+  <style>
+    /* 通用重置 */
+    * {
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 背景：神秘渐变 + 闪烁 */
+    body::before {
+      content: "";
+      position: absolute;
+      top: -50%; 
+      left: -50%;
+      width: 200%; 
+      height: 200%;
+      background: conic-gradient(from 0deg, #002, #005, #009, #330066, #110022);
+      animation: swirl 8s linear infinite;
+      opacity: 0.4;
+      z-index: -2;
+    }
+    @keyframes swirl {
+      100% { transform: rotate(360deg); }
+    }
+    body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.7) 100%);
+      mix-blend-mode: overlay;
+      z-index: -1;
+      animation: flicker 5s infinite alternate;
+    }
+    @keyframes flicker {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.4; }
+    }
+
+    /* 容器 */
+    .container {
+      width: 90%;
+      max-width: 350px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(5px);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.1);
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .container h1 {
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+      font-size: 1.3rem;
+    }
+    .warning {
+      margin-bottom: 15px;
+      color: #ccffff;
+      font-size: 0.9rem;
+      text-shadow: 0 0 3px rgba(255,255,255,0.2);
+    }
+    .container input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 4px;
+      outline: none;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      font-size: 1rem;
+    }
+    .container button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #003333, #00cccc);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .container button:hover {
+      background: linear-gradient(135deg, #004444, #00ffff);
+    }
+
+    /* 成功&失败效果区 */
+    .result {
+      display: none;
+      margin-top: 20px;
+      animation: fadeIn 0.8s forwards;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /*
+     * 超级爆炸(输错)
+     * 大范围多重冲击波 + 屏幕震动
+     */
+    .container.explosion {
+      animation: screenShake 1s;
+      /* 触发多重冲击波：通过多层 ::after / ::before 叠加，也可JS动态注入 */
+    }
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0,0); }
+      10% { transform: translate(-10px, 2px); }
+      20% { transform: translate(10px, -2px); }
+      30% { transform: translate(-10px, 2px); }
+      40% { transform: translate(10px, 2px); }
+      50% { transform: translate(-10px, -2px); }
+      60% { transform: translate(8px, 2px); }
+      70% { transform: translate(-8px, -2px); }
+      80% { transform: translate(6px, 2px); }
+      90% { transform: translate(-6px, -2px); }
+    }
+
+    /* 第1层冲击波 */
+    .container.explosion::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      background: radial-gradient(circle, rgba(255,0,0,0.8), transparent 70%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      animation: errorBoom1 0.8s forwards;
+      z-index: 10;
+      pointer-events: none;
+    }
+    @keyframes errorBoom1 {
+      0% {
+        width: 0; height: 0; opacity: 0.9;
+      }
+      50% {
+        width: 1000px; height: 1000px; opacity: 0.5;
+      }
+      100% {
+        width: 2000px; height: 2000px; opacity: 0;
+      }
+    }
+
+    /* 第2层冲击波（更暗一些） */
+    .container.explosion::before {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      background: radial-gradient(circle, rgba(139,0,0,0.7), transparent 80%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      animation: errorBoom2 1s forwards;
+      z-index: 9;
+      pointer-events: none;
+    }
+    @keyframes errorBoom2 {
+      0% {
+        width: 0; height: 0; opacity: 0.8;
+      }
+      50% {
+        width: 1200px; height: 1200px; opacity: 0.4;
+      }
+      100% {
+        width: 2400px; height: 2400px; opacity: 0;
+      }
+    }
+
+    /* 成功：炫彩碎片 + 绿色冲击 */
+    .container.success::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(0,255,128,0.6), transparent 60%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0.2);
+      animation: successPop 1s forwards;
+      z-index: 10;
+      pointer-events: none;
+    }
+    @keyframes successPop {
+      0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0.6;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .container.success .confetti {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .container.success .confetti span {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: red;
+      border-radius: 50%;
+      animation: confettiFly 1.5s forwards;
+    }
+    @keyframes confettiFly {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* 媒体查询适配 */
+    @media (max-width: 768px) {
+      .container {
+        max-width: 340px;
+        padding: 16px;
+      }
+      .container h1 {
+        font-size: 1.2rem;
+      }
+    }
+    @media (min-width: 769px) and (max-width: 1023px) {
+      .container {
+        max-width: 400px;
+        padding: 20px;
+      }
+      .container h1 {
+        font-size: 1.3rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      /* 更大屏笔记本/桌面 */
+      .container {
+        max-width: 500px;
+        padding: 30px;
+      }
+      .container h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+  <h1>更神秘入口2</h1>
+  <div class="warning">请输入密码</div>
+  <input type="password" id="password" placeholder="请不要输入密码" />
+  <button onclick="checkPass()">确 认</button>
+
+  <!-- 成功显示的区块 -->
+  <div class="result" id="resultBlock">
+    <h2>链接获取成功</h2>
+    <p style="word-break: break-all; line-height:1.6;">
+      http://www.ytz.com.cn/<strong>()</strong>/206.html
+    </p>
+    <p>请按活动指示，在括号处填入恰当内容……</p>
+  </div>
+
+  <!-- “炫彩碎片”容器，成功时创建并添加小碎片 -->
+  <div class="confetti" id="confettiBox"></div>
+</div>
+
+<script>
+function checkPass(){
+  const p = document.getElementById("password").value.trim();
+  const container = document.getElementById("mainContainer");
+
+  // 重置先前状态
+  container.classList.remove("explosion", "success");
+  document.getElementById("resultBlock").style.display = "none";
+  
+  if(p === "eaol"){
+    // 成功：添加 success 类
+    container.classList.add("success");
+    // 显示链接
+    document.getElementById("resultBlock").style.display = "block";
+    // 生成多彩碎片
+    createConfetti(30);
+  } else {
+    // 失败：添加 explosion 类
+    container.classList.add("explosion");
+  }
+}
+
+/* 生成彩色小碎片 */
+function createConfetti(count){
+  const confettiBox = document.getElementById("confettiBox");
+  confettiBox.innerHTML = ""; // 清空
+  const width = confettiBox.clientWidth;
+  const height = confettiBox.clientHeight;
+
+  for(let i=0; i<count; i++){
+    const span = document.createElement("span");
+    // 随机颜色
+    const randomColor = getRandomColor();
+    span.style.background = randomColor;
+    // 飞行距离
+    const rx = (Math.random() * 400 - 200);
+    const ry = -(Math.random() * 300 + 100);
+    span.style.setProperty("--tx", rx + "px");
+    span.style.setProperty("--ty", ry + "px");
+    // 随机起点
+    const startX = Math.random() * width;
+    const startY = Math.random() * height;
+    span.style.left = startX + "px";
+    span.style.top = startY + "px";
+    confettiBox.appendChild(span);
+  }
+  // 2秒后清空碎片
+  setTimeout(()=> confettiBox.innerHTML="", 2000);
+}
+
+function getRandomColor(){
+  const colors = ["#ff0040", "#ff8000", "#ffcc00", "#00ffcc", "#00bfff", "#ff00ff", "#ff66ff", "#00ff00"];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+</script>
+
+</body>
+</html>
